@@ -1,1142 +1,127 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8"/>
-  <!-- スマホ全面最適化（全幅） -->
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"/>
-  <title>ホッピンマッシュ福山店 予約</title>
-<style>
-:root{
-  --brand:#E60012;
-  --ink:#111315;
-  --muted:#62676C;
-  --line:#D5D9DD;
-  --bg:#FFFFFF;
-  --sel-bg:#fde6e6; /* 時間選択の薄い赤 */
-  --focus:#b0b7bf; /* 入力フォーカス線 */
-  --error:#e53935; /* エラーバナー */
-}
-
-/* ========== Reset / Base ========== */
-*{box-sizing:border-box}
-html,body{height:100%; -webkit-text-size-adjust:100%;}
-body{
-  margin:0;
-  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
-  font-size:clamp(30px, 6.0vw + 0.2rem, 40px);
-  color:var(--ink);
-  background:var(--bg);
-  padding-top:env(safe-area-inset-top,0);
-  padding-bottom:env(safe-area-inset-bottom,0);
-  line-height:1.35;
-}
-
-/* ========== 背景ロゴ ========== */
-.bg-logo{
-  position:fixed; inset:0; z-index:-2;
-  background-image:url("https://msp.c.yimg.jp/images/v2/FUTi93tXq405grZVGgDqG40yntl66Vd8f8A8GdNaSPNHWO-P2_c_V2IK2-hpt0qa8NpDbcpdjVjW6sjFkzU7M44H_dlad3LgBfrYR5Htin-iBe9LmvH8TtY4tuCC-Tcu-rYwQSUXycB-p2iBsqZdBaWHMlXRAs-jtx4HHo5npKOdjTPwF4fhcWRP5oZJEgTIgPvDecurUbz5xLxCrHZJ2qqeJlCcdB45iKaojAflNv1TAr0dFMmuz96UfXzfL-Guc0HQYbG-PHdtdVLPTzbfV0TWjuRgo6N-GzO8TV7FXADuj-bNxtbvZHSIu3oHMhpWVGrUPufDOGrRknWCXSlBfyVlQAOuydEcPFkln-G0GI2ilid3UFCd-FWgNcUGY_PDBlLJpQ5C7aPRiYU2r2WBJA==/h9xMJkD_9Itg3P4SOxwl718LCUU3avnPef2ZjSSdmEGOL4FxLAPbXizVCxq3FcASFy3-_NkBWTks900-c-k-c0x00ffffff-no-rj?errorImage=false");
-  background-repeat:no-repeat; background-position:center 20%; background-size: 100% auto; opacity:0.26;
-}
-.bg-logo::after{
-  content:""; position:absolute; inset:0; z-index:-1;
-  background:radial-gradient(ellipse at top, rgba(255,255,255,.45), rgba(255,255,255,.65));
-}
-
-/* ========== ヘッダ ========== */
-.hd{position:sticky;top:0;background:#fff;border-bottom:1px solid var(--line);padding:12px 12px;z-index:10}
-.titleLogo{display:flex;flex-direction:column;align-items:center;gap:8px}
-.titleLogo img{height:86px;object-fit:contain}
-.subtitle{font-size:clamp(28px,6.5vw,38px);font-weight:900;color:#e65100}
-
-/* ========== レイアウト ========== */
-.container.fullbleed{max-width:none;margin:0;padding:0}
-.card.edge{border-radius:0; margin:0 0 16px 0;}
-.container{max-width:960px;margin:0 auto;padding:0 12px}
-.card{background:#fff;border:1px solid var(--line);padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.03)}
-h2{font-size:clamp(32px, 6.8vw, 44px);margin:0 0 14px}
-
-/* ========== カレンダー ========== */
-.weekday-head{
-  display:grid;
-  grid-template-columns:repeat(7,minmax(0,1fr)); /* ★ minmax(0,1fr)ではみ出し防止 */
-  gap:8px;
-  margin:4px 0 12px;
-  width:100%;
-  max-width:100%;
-  overflow:hidden; /* ★ 念のため */
-}
-.weekday-head > div{text-align:center;color:var(--muted);font-size:clamp(22px,4.6vw,28px)}
-.weekday-head .sun{color:#d32f2f}
-.weekday-head .sat{color:#1976d2}
-
-/* カード幅にフィットさせる（全幅） */
-.calendar{
-  display:grid;
-  grid-template-columns:repeat(7,minmax(0,1fr)); /* ★ ここもminmax(0,1fr) */
-  gap:8px;
-  width:100%;
-  max-width:100%;
-  margin:0 auto;
-  overflow:hidden; /* ★ 念のため */
-}
-.day,.slot{
-  padding:18px;border:1px solid var(--line);border-radius:14px;text-align:center;background:#fff;
-  transition:transform .05s ease, box-shadow .05s ease, background .1s ease;
-}
-.day.full,.day.block,.slot.full,.slot.cutoff{opacity:.4;pointer-events:none}
-/* 日付（上段）と曜日（下段） */
-.day > div:first-child{ font-size:clamp(20px,4.5vw,30px); font-weight:900; }
-.day .dow{font-size:clamp(22px,4.6vw,28px)}
-.day.sun{color:#d32f2f}
-.day.sat{color:#1976d2}
-
-/* 時間ボタンの時間表示を大きく */
-.slot > div:first-child{ font-size: clamp(34px, 7.4vw, 48px); font-weight: 900; }
-.slot .remain{font-size:clamp(22px,4.6vw,28px);color:var(--muted)}
-.slot.selected{background:var(--sel-bg); border-color:#f3c7c7}
-
-/* ========== スロットグリッド＋フィルタ ========== */
-.slots{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.slot-filters{display:flex;gap:8px;margin:6px 0 12px}
-.chip{appearance:none;border:2px solid var(--line);background:#fff;border-radius:999px;padding:8px 14px;font-size:clamp(22px,4.6vw,28px)}
-.chip-on{border-color:#000}
-
-/* ========== ボタン ========== */
-.btn{appearance:none;border:none;background:var(--brand);color:#fff;padding:16px 20px;border-radius:999px;font-size:clamp(28px,6.8vw,38px);font-weight:900;transition:transform .05s ease, box-shadow .05s ease}
-.btn-outline{appearance:none;border:2px solid var(--ink);background:#fff;color:#000;padding:14px 18px;border-radius:999px;font-size:clamp(26px,6.2vw,34px)}
-.small{font-size:clamp(22px,5.2vw,28px);padding:10px 14px}
-.tiny{font-size:clamp(18px,4.2vw,22px);padding:8px 12px}
-.press:active,.day:active,.slot:active{transform:translateY(2px); box-shadow: inset 0 2px 3px rgba(0,0,0,.2)}
-
-/* ========== 入力 ========== */
-input,textarea{
-  padding:16px;border:2px solid var(--line);border-radius:14px;font-size:clamp(28px,6.8vw,38px);width:100%;background:#fff;
-  transition:border-color .12s ease, box-shadow .12s ease;
-}
-input:focus, textarea:focus{outline:none;border-color:var(--focus); box-shadow:0 0 0 3px rgba(176,183,191,.15)}
-input.invalid, textarea.invalid{border-color:#e53935 !important; box-shadow:0 0 0 3px rgba(229,57,53,.15)}
-.grid-num{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
-.grid-1col{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:12px}
-label{display:flex;flex-direction:column;font-size:clamp(22px,4.6vw,28px);gap:8px}
-/* 数字欄幅 */
-.num input{max-width:180px}
-.num-wide input{max-width:320px}
-/* 氏名/電話/郵便番号 幅（左寄せ・縮小） */
-#rowName input{max-width:50%; margin-left:0}
-#rowPhone input{max-width:50%; margin-left:0}
-#rowZip input{max-width:33.3333%; margin-left:0}
-/* ? アイコンボタン */
-.rowWithBtn{display:flex;gap:10px;align-items:center}
-.iconBtn{appearance:none;border:2px solid var(--ink);background:#fff;color:#000;width:48px;height:48px;border-radius:50%;font-weight:900;font-size:28px;line-height:44px;text-align:center}
-.iconBtn:active{transform:translateY(2px)}
-
-/* 見積り */
-.est{padding:14px;background:#fafafa;border:2px dashed var(--line);border-radius:14px;margin-bottom:14px}
-
-/* バナー */
-.banner{background:#fff3cd;border:2px solid #ffeeba;border-radius:14px;padding:12px;margin:0 12px 14px}
-
-/* テキスト */
-.err{color:#d32f2f;font-size:clamp(22px,4.6vw,28px)}
-.muted{color:var(--muted);font-size:clamp(22px,4.6vw,28px)}
-.ft{padding:28px 16px;text-align:center;color:var(--muted)}
-
-/* ========== Skeleton ========== */
-.skeleton{min-height:200px;background:linear-gradient(90deg,#f0f0f0 25%,#f8f8f8 37%,#f0f0f0 63%);background-size:400% 100%;animation:shimmer .8s ease-in-out infinite}
-@keyframes shimmer{0%{background-position:100% 0}100%{background-position:0 0}}
-
-/* ========== モーダル/オーバーレイ ========== */
-.modal{
-  position:fixed; inset:0; display:flex; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.35); z-index:10000; padding:16px;
-}
-.modal-card{
-  background:#fff; border-radius:18px; max-width:900px; width:100%;
-  box-shadow:0 16px 44px rgba(0,0,0,.3);
-  display:flex; flex-direction:column; max-height:90vh; overflow:hidden;
-}
-.modal-hd{display:flex;align-items:center;justify-content:space-between;margin:10px 10px 0 10px}
-.modal-close{appearance:none;border:none;background:transparent;font-size:clamp(36px,8vw,44px);line-height:1}
-.modal-body{
-  font-size:clamp(26px,5.8vw,34px); line-height:1.6;
-  padding:10px 16px 4px 16px; overflow:auto; -webkit-overflow-scrolling:touch;
-  max-height:calc(90vh - 140px);
-}
-.terms-scroll{max-height:calc(90vh - 160px)}
-.modal-ft{display:flex; justify-content:flex-end; margin:8px 16px 16px 16px; flex-shrink:0}
-
-/* 同意チェック（拡大&中央寄せ） */
-.agree{ display:flex; align-items:center; justify-content:center; gap:16px; margin-top:12px; }
-.agree input{ transform:scale(2.5); transform-origin:center; width:32px; height:32px; }
-.agree-label{ text-align:center; }
-
-/* 注意文の小サイズ箇条書き（確認モーダル内） */
-.small-note{ font-size: clamp(20px, 4.6vw, 26px); color:#333; padding-left:1.1em; margin:8px 0 0; }
-.small-note li{ list-style:disc; margin-left:1em; margin-bottom:.2em; }
-
-/* 送信中オーバーレイ（より暗く） */
-.overlay{ position:fixed;inset:0;display:flex;align-items:center;justify-content:center; background:rgba(0,0,0,.6);z-index:11000 }
-.overlay-card{ background:#fff;border-radius:14px;padding:18px 22px;font-weight:900; font-size:clamp(28px,6.8vw,38px) }
-
-/* ========== 成功演出（旧：中央きのこ） ========== */
-.success{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .3s ease;z-index:9998}
-.success.show{opacity:1}
-.success-inner{position:relative;display:flex;flex-direction:column;align-items:center;gap:16px}
-.success .done{font-weight:900;text-align:center;font-size:clamp(48px, 10vw, 72px);line-height:1.1}
-.success .done div:nth-child(1){margin-bottom:.2em}
-.bounce{position:relative;animation:pop 1.2s ease-out forwards}
-.bounce.mush{width:min(38vw,200px);animation-delay:.15s}
-@keyframes pop{ 0%{transform:translateY(80%); opacity:0} 40%{transform:translateY(-10%); opacity:1} 60%{transform:translateY(4%)} 100%{transform:translateY(0)} }
-
-/* 「未入力の欄があります」降ってくる演出 */
-.nudge{
-  position:fixed; top:-120px; left:0; right:0; margin:auto;
-  width:min(90vw, 660px); background:#e53935; color:#fff; text-align:center;
-  border-radius:14px; padding:14px 16px; font-weight:900; font-size:clamp(28px,6.8vw,38px);
-  z-index:12000; box-shadow:0 10px 24px rgba(0,0,0,.25);
-  transition:transform .5s cubic-bezier(.2,.8,.3,1), opacity .5s ease;
-  transform:translateY(0); opacity:.0;
-}
-.nudge.show{ transform:translateY(160px); opacity:1; }
-
-/* ハニーポット（画面外） */
-.hp{position:absolute; left:-9999px; top:auto; width:1px; height:1px; opacity:0}
-
-/* ========== メール送信エラーバナー（上から降りる） ========== */
-#mailError{
-  position:fixed; top:-200px; left:0; right:0; margin:auto;
-  width:min(92vw, 820px); background:var(--error); color:#fff; text-align:center; font-weight:900;
-  border-radius:16px; padding:18px 20px; font-size:clamp(30px,7.6vw,44px); line-height:1.25; z-index:13000;
-  box-shadow:0 14px 28px rgba(0,0,0,.3);
-  transition:transform .5s cubic-bezier(.2,.8,.3,1), opacity .5s ease;
-  transform:translateY(0); opacity:0;
-}
-#mailError.show{ transform:translateY(240px); opacity:1; }
-#mailError small{ display:block; font-size:clamp(22px,5.2vw,28px); font-weight:800; margin-top:.2em; }
-
-/* ========== 予約完了モーダル（白文字で盛大に） ========== */
-.final-modal{
-  position:fixed; inset:0; display:none; align-items:center; justify-content:center;
-  background:rgba(0,0,0,.55); z-index:12500; padding:16px;
-}
-.final-card{
-  background:linear-gradient(145deg,#111,#222); color:#fff; text-align:center; border-radius:22px;
-  width:min(92vw,900px); padding:28px 24px; box-shadow:0 18px 48px rgba(0,0,0,.55); animation:popIn .26s ease-out both;
-}
-@keyframes popIn{ 0%{transform:scale(.96); opacity:0} 100%{transform:scale(1); opacity:1} }
-.final-title{ font-size:clamp(42px,10vw,72px); font-weight:900; letter-spacing:.02em; margin:6px 0 4px; text-shadow:0 2px 0 rgba(0,0,0,.25); }
-.final-sub{ font-size:clamp(28px,6.8vw,40px); opacity:.95; margin:0 0 12px; }
-.final-mush{ font-size:clamp(60px,16vw,120px); line-height:1; filter:drop-shadow(0 6px 14px rgba(255,0,0,.35)); animation:float 1.6s ease-in-out infinite; }
-@keyframes float{ 0%,100%{transform:translateY(0)} 50%{transform:translateY(-6px)} }
-
-/* ========== フッタ ========== */
-.ft{padding:28px 16px;text-align:center;color:var(--muted)}
-
-/* ===================================================================
-   追加：OTP（認証コード）セクション（最小限のレイアウト補助のみ）
-   ※ 既存の色・タイポ・ボタン/入力のサイズはそのまま利用
-=================================================================== */
-#otpSection{ margin:8px 0 12px; }
-.otp-lead{ margin:0 0 8px 0; }
-.otp-grid{ display:grid; grid-template-columns: auto 1fr; gap:10px; align-items:center; }
-.otp-actions{ display:grid; grid-template-columns: auto auto; gap:10px; align-items:center; justify-content:start; }
-/* カウントダウン表示（既存mutedと同等トーン） */
-#otpCountdown{ font-size:clamp(22px,4.6vw,28px); color:var(--muted); }
-
-/* 追加 */
-.otp-section { text-align: center; margin-bottom: 12px; }
-/* 入力幅：4桁コード欄を全体の1/3に（モーダル幅に対して） */
-#otpInput{ flex: 0 1 33.3333%; max-width: 33.3333%; }
-/* 「コード送信」の文字を1行固定（改行させない） */
-#otpSendBtn{ white-space: nowrap; }
-/* 押した感（忙しい状態の視覚フィードバック） */
-.btn.busy, .btn-outline.busy{ opacity:.7; pointer-events:none; }
-/* クリック直後の軽いフィードバック（既存pressの補強） */
-.btn.clicked, .btn-outline.clicked{ transform: translateY(2px); box-shadow: inset 0 2px 3px rgba(0,0,0,.2); }
-
-/* エラー時の軽い揺れ（既存 .shake を活用可能） */
-.shake{ animation:shake .2s linear 0s 2; }
-@keyframes shake{ 0%{transform:translateX(0)} 25%{transform:translateX(4px)} 50%{transform:translateX(-4px)} 75%{transform:translateX(4px)} 100%{transform:translateX(0)} }
-
-/* 押下中・処理中 */
-.btn.processing { background: #666; transform: scale(0.97); box-shadow: inset 0 3px 6px rgba(0,0,0,0.25); }
-/* 成功時 */
-.btn.success { background: #2e6b4e; color: #fff; transform: scale(1.05); transition: all 0.3s ease; }
-/* 失敗・エラー時 */
-.btn.error { background: #8B0000; color: #fff; transform: scale(0.95); animation: shake 0.3s linear; }
-
-/* セクション区切り線 */
-.section-divider { border: none; border-top: 1px solid #ddd; margin: 16px 0; }
-
-/* 中央寄せ行 */
-.otp-center { display: flex; justify-content: center; align-items: center; gap: 12px; }
-
-
-/* ===== 利用規約モーダル：折り返し & スクロール対応 ===== */
-#infoModal {
-  /* すでに display:flex で中央寄せされている想定。パディングだけ追加しても他UIに影響なし */
-  padding: 16px;
-  box-sizing: border-box;
-}
-
-/* タイトルは固定、本文のみスクロール */
-#infoModal .info-title {
-  flex: 0 0 auto;
-  /* 長い単語でのはみ出し防止 */
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  white-space: normal;
-}
-
-/* 本文：縦スクロール＆長文折り返し */
-#infoModal .info-body {
-  flex: 1 1 auto;
-  max-height: 80vh;                 /* 画面の8割までに制限（ヘッダ/余白分はみ出さない） */
-  overflow-y: auto;                 /* 縦スクロール可 */
-  -webkit-overflow-scrolling: touch;/* iOS慣性スクロール */
-  padding-right: 8px;               /* スクロールバーでの文字潰れ軽減 */
-  box-sizing: border-box;
-
-  /* 文章はみ出し対策一式 */
-  overflow-wrap: anywhere;
-  word-break: break-word;
-  white-space: normal;              /* pre要素以外は通常折返し */
-}
-
-/* pre/code のはみ出し対策（termsにコード/表記がある場合の保険） */
-#infoModal .info-body pre,
-#infoModal .info-body code {
-  white-space: pre-wrap;            /* 折返し */
-  word-break: break-word;
-}
-
-/* 画像・表が横にはみ出さないように */
-#infoModal .info-body img {
-  max-width: 100%;
-  height: auto;
-}
-#infoModal .info-body table {
-  width: 100%;
-  border-collapse: collapse;
-}
-#infoModal .info-body table,
-#infoModal .info-body thead,
-#infoModal .info-body tbody {
-  display: block;                   /* 横溢れ時のスクロールを許可（必要に応じて） */
-}
-#infoModal .info-body tr {
-  display: table;                   /* 表示崩れを抑えつつ */
-  width: 100%;
-  box-sizing: border-box;
-}
-#infoModal .info-body td,
-#infoModal .info-body th {
-  word-break: break-word;
-}
-
-/* 小さな端末での安全側余白 */
-@media (max-width: 480px) {
-  #infoModal .info-body {
-    max-height: 78vh;
-  }
-}
-
-
-/* 確認モーダル内の同意チェックボックスサイズ調整 */
-#reviewAgree {
-  transform: scale(0.88); /* ← 元の約2/3サイズに縮小 */
-  transform-origin: left center;
-  margin-right: 6px;
-  vertical-align: middle;
-}
-
-
-
-</style>
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+  <title>ホッピンマッシュ福山店 予約（GitHub版）</title>
+  <style>
+    :root{
+      --brand:#E60012;
+      --ink:#111315;
+      --bg:#FFFFFF;
+    }
+    *{box-sizing:border-box;}
+    html,body{
+      margin:0;
+      padding:0;
+      height:100%;
+      width:100%;
+      background:#f5f5f5;
+      font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
+        "Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+      -webkit-text-size-adjust:100%;
+    }
+    body{
+      display:flex;
+      flex-direction:column;
+      color:var(--ink);
+    }
+    header{
+      padding:10px 12px 6px;
+      background:#fff;
+      border-bottom:1px solid #e5e5e5;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .titleLogo{
+      text-align:center;
+    }
+    .titleLogo img{
+      max-width:260px;
+      width:80vw;
+      height:auto;
+      display:block;
+      margin:0 auto 4px;
+    }
+    .subtitle{
+      font-size:14px;
+      letter-spacing:0.08em;
+      color:#555;
+    }
+    main{
+      flex:1;
+      min-height:0;
+      display:flex;
+      flex-direction:column;
+      background:#000; /* iframeの周りは黒で縁取り */
+    }
+    .frame-wrap{
+      flex:1;
+      min-height:0;
+      position:relative;
+    }
+    iframe{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      border:none;
+      background:var(--bg);
+    }
+    .loading-msg{
+      position:absolute;
+      inset:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      font-size:18px;
+      color:#fff;
+      z-index:0;
+    }
+    footer{
+      padding:6px 10px 10px;
+      font-size:11px;
+      text-align:center;
+      color:#888;
+      background:#fff;
+      border-top:1px solid #e5e5e5;
+    }
+    @media (min-width:900px){
+      header{padding:14px 16px 8px;}
+      .subtitle{font-size:15px;}
+    }
+  </style>
 </head>
 <body>
-  <!-- 背景ロゴ -->
-  <div class="bg-logo"></div>
-
-  <!-- 入力未完了の大アラート -->
-  <div id="nudge" class="nudge">未入力の欄があります</div>
-
-  <!-- 送信中オーバーレイ -->
-  <div id="overlay" class="overlay" style="display:none">
-    <div class="overlay-card"><div id="overlayText">送信中…</div></div>
-  </div>
-
-  <!-- 確認モーダル -->
-  <div id="reviewModal" class="modal" style="display:none" role="dialog" aria-modal="true">
-    <div class="modal-card" role="document">
-      <div class="modal-hd">
-        <strong>予約内容の確認</strong>
-        <button class="modal-close" onclick="closeReviewModal()" aria-label="閉じる">×</button>
-      </div>
-      <div class="modal-body">
-        <p><b>日時</b>：<span id="rvDateTime">-</span></p>
-        <p><b>人数</b>：<span id="rvPeople">-</span></p>
-        <p><b>氏名</b>：<span id="rvName">-</span></p>
-        <p><b>メール</b>：<span id="rvEmail">-</span></p>
-        <p><b>電話</b>：<span id="rvPhone">-</span></p>
-        <p><b>住所</b>：<span id="rvAddr">-</span></p>
-        <p><b>合計金額</b>：<span id="rvAmount">-</span></p>
-        <hr/>
-
-        <!-- ここから：メール認証セクション -->
-        <div id="otpSection" class="otp-section">
-          <p id="otpInfo" class="muted">
-            コード送信ボタンを押していただき<br>
-            メールに書いてある4桁の数字を入力してください。
-          </p>
-          <div class="otp-center">
-            <button id="otpSendBtn" class="btn-outline small" type="button" aria-live="polite">コード送信</button>
-            <input id="otpInput" type="tel" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="4桁コード" />
-          </div>
-          <div class="otp-center" style="margin-top:12px">
-            <button id="otpVerifyBtn" class="btn small" type="button" aria-live="polite">確認</button>
-          </div>
-          <div id="otpCountdown" class="muted" style="display:none; margin-top:6px"></div>
-        </div>
-
-        <!-- セクション区切り線 -->
-        <hr class="section-divider" />
-
-        <div class="terms" style="margin-top:12px">
-          <ul class="small-note">
-            <li>予約当日（0：00以降）のキャンセルは全額ご負担いただきます。</li>
-            <li>予約を確定するとメールが届きます。</li>
-            <li>届かない場合はメールアドレスをご確認の上、もう一度予約をお願いします。</li>
-          </ul>
-        </div>
-
-        <label class="agree" style="margin-top:8px">
-          <input id="reviewAgree" type="checkbox" onchange="onAgreeChanged()">
-          <span class="agree-label">予約内容に間違えが無いことを確認し規約に同意します</span>
-        </label>
-        <!-- 👇 この行は削除 -->
-        <!-- <div class="muted" style="margin-top:4px">利用規約に同意しました</div> -->
-      </div>
-      <div class="modal-ft">
-        <button id="reviewConfirmBtn" class="btn" disabled onclick="finalSubmit()">予約を確定</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- OTP成功モーダル -->
-  <div id="otpOkModal" class="modal" style="display:none" role="dialog" aria-modal="true">
-    <div class="modal-card" role="document">
-      <div class="modal-hd">
-        <strong>認証できました</strong>
-        <button class="modal-close" onclick="closeOtpOkModal()" aria-label="閉じる">×</button>
-      </div>
-      <div class="modal-body">
-        <p>メールアドレスの認証が完了しました。</p>
-      </div>
-      <div class="modal-ft">
-        <button class="btn" type="button" onclick="closeOtpOkModal()">閉じる</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ▼▼ 追加：キャンセル最終確認モーダル ▼▼ -->
-  <div id="cancelConfirmModal" class="modal" style="display:none" role="dialog" aria-modal="true">
-    <div class="modal-card" role="document">
-      <div class="modal-hd">
-        <strong>キャンセルの最終確認</strong>
-        <button class="modal-close" id="cancelConfirmNo" aria-label="閉じる">×</button>
-      </div>
-      <div class="modal-body">
-        <p>当日キャンセルの場合は全額負担となります</p>
-        <p>本当にキャンセル処理を行いますか？</p>
-      </div>
-      <div class="modal-ft">
-        <button class="btn-outline" id="cancelConfirmNoBtn" type="button">いいえ</button>
-        <button class="btn" id="cancelConfirmYes" type="button">はい</button>
-      </div>
-    </div>
-  </div>
-  <!-- ▲▲ 追加ここまで：キャンセル最終確認モーダル ▲▲ -->
-
-  <!-- ▼▼ 追加：キャンセル結果モーダル ▼▼ -->
-  <div id="cancelResultModal" class="modal" style="display:none" role="dialog" aria-modal="true">
-    <div class="modal-card" role="document">
-      <div class="modal-hd">
-        <strong>キャンセル結果</strong>
-        <button class="modal-close" id="cancelResultClose" aria-label="閉じる">×</button>
-      </div>
-      <div class="modal-body" id="cancelResultBody">
-        <!-- JSで文面を差し替えます -->
-      </div>
-      <div class="modal-ft">
-        <button class="btn" id="cancelResultCloseBtn" type="button">閉じる</button>
-      </div>
-    </div>
-  </div>
-  <!-- ▲▲ 追加ここまで：キャンセル結果モーダル ▲▲ -->
-
-  <!-- 情報モーダル -->
-  <div id="infoModal" class="modal" style="display:none" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="modal-hd">
-        <strong class="info-title">ご案内</strong>
-        <button class="modal-close" onclick="closeInfoModal()" aria-label="閉じる">×</button>
-      </div>
-      <div class="info-body"></div>
-      <div class="modal-ft"><button class="btn" onclick="closeInfoModal()">閉じる</button></div>
-    </div>
-  </div>
-
-  <!-- 利用規約モーダル（ページ内 / terms.html を読み込み） -->
-  <div id="termsModal" class="modal" style="display:none" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <div class="modal-hd">
-        <strong>利用規約</strong>
-        <button class="modal-close" onclick="closeTerms()" aria-label="閉じる">×</button>
-      </div>
-      <div class="modal-body terms-scroll">
-<section>
-  <h3>トランポリンパーク利用規約</h3>
-  <p>本規約は、当トランポリンパーク（以下「当施設」）の利用に関し、当施設を利用されるすべてのお客様（以下「お客様」）に適用されます。お客様は当施設を利用することにより、本規約に同意したものとみなします。</p>
-
-  <h4>第1条（適用範囲）</h4>
-  <p>本規約は、当施設の施設・設備・付帯サービスの利用に関する一切に適用されます。個別の掲示・案内・スタッフの指示は本規約の一部を構成し、相互に補完されます。</p>
-
-  <h4>第2条（利用条件）</h4>
-  <ol>
-    <li>中学生以下のお客様は、必ず保護者の同伴のもとでご利用ください。</li>
-    <li>高校生（未成年）のお客様は、保護者の同意がある場合に限り、単独でご利用いただけます。</li>
-    <li>次に該当する方は利用できません。
-      <ul>
-        <li>飲酒している方</li>
-        <li>妊娠中の方</li>
-        <li>医師から運動制限を受けている方</li>
-        <li>体調不良（発熱・めまい・過労・睡眠不足等）の方</li>
-      </ul>
-    </li>
-    <li>当施設スタッフの指示に従わない場合、利用の中止または退場をお願いすることがあります。</li>
-  </ol>
-
-  <h4>第3条（危険の認識と自己責任）</h4>
-  <ol>
-    <li>トランポリンの利用には、転倒・衝突・骨折・捻挫等の重大な事故の危険が伴うことを十分理解し、自己の責任において利用するものとします。</li>
-    <li>当施設は安全管理に努めますが、利用中に発生した傷害・事故について、当施設に故意または重大な過失がある場合を除き、一切の責任を負いません。</li>
-  </ol>
-
-  <h4>第4条（宙返りの禁止）</h4>
-  <ol>
-    <li>宙返り（前方・後方・側方を含む一切の回転技）は、原則として禁止します。</li>
-    <li>当施設スタッフがその都度許可した場合に限り、周囲の安全を十分確認のうえで実施できます。許可は各回ごとに必要です。</li>
-    <li>許可がある場合でも、当施設が当該行為の結果について責任を負うものではありません。スタッフの目が届かない状況での宙返りは禁止します。</li>
-  </ol>
-
-  <h4>第5条（免責事項）</h4>
-  <p>次の場合、当施設は責任を負いません。万一事故が発生した場合でも、当施設の責任は当施設が加入する保険の補償範囲内に限定されます。</p>
-  <ul>
-    <li>お客様自身の不注意・過失による事故</li>
-    <li>他のお客様との接触・衝突に起因する事故</li>
-    <li>ルール違反・スタッフ指示違反に起因する事故</li>
-    <li>所持品の紛失・盗難・破損</li>
-  </ul>
-
-  <h4>第6条（禁止行為）</h4>
-  <ul>
-    <li>危険行為（複数人で同一面を同時利用、他人を押す、乱暴なジャンプ等）</li>
-    <li>飲酒・喫煙後の利用</li>
-    <li>当施設設備の故意または過失による破損行為</li>
-  </ul>
-
-  <h4>第7条（損害賠償）</h4>
-  <ol>
-    <li>お客様が当施設または第三者に損害を与えた場合、その損害を賠償していただきます。</li>
-    <li>未成年者の利用に関し、保護者は当該未成年者の行為について連帯して責任を負います。</li>
-  </ol>
-
-  <h4>第8条（健康状態の申告）</h4>
-  <ol>
-    <li>持病・既往症・怪我等のある方は、利用開始前に必ず申告してください。</li>
-    <li>申告がなく発生した事故について、当施設は責任を負いません。</li>
-  </ol>
-
-  <h4>第9条（キャンセル・遅刻規定）</h4>
-  <ol>
-    <li>ご予約当日のキャンセル（当日0:00以降）は、キャンセル料として利用料金の全額をお支払いいただきます。</li>
-    <li>ご予約時間までに来店がない場合は、当日キャンセル扱いとします。</li>
-    <li>遅刻された場合でも、利用時間はご予約枠の時間内に限られ、延長はできません。</li>
-  </ol>
-
-  <h4>第10条（規約の変更）</h4>
-  <p>当施設は、必要に応じて本規約を改定することができます。最新の規約は施設内掲示または当施設ホームページに掲載します。</p>
-
-  <h4>第11条（準拠法・合意管轄）</h4>
-  <ol>
-    <li>本規約は日本法に準拠します。</li>
-    <li>本規約に関して紛争が生じた場合は、当施設所在地を管轄する裁判所を第一審の専属的合意管轄裁判所とします。</li>
-  </ol>
-</section>
-
-      </div>
-      <div class="modal-ft">
-        <button class="btn-outline" onclick="closeTerms()">閉じる</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- 成功演出（🍄エモジ＋紙吹雪）※既存 -->
-  <div id="success" class="success">
-    <div class="success-inner">
-      <div class="confetti" aria-hidden="true"></div>
-      <span class="mush-emoji bounce" role="img" aria-label="きのこ"><img src="https://msp.c.yimg.jp/images/v2/FUTi93tXq405grZVGgDqG40yntl66Vd8f8A8GdNaSPNHWO-P2_c_V2IK2-hpt0qa8NpDbcpdjVjW6sjFkzU7M44H_dlad3LgBfrYR5Htin-iBe9LmvH8TtY4tuCC-Tcu-rYwQSUXycB-p2iBsqZdBaWHMlXRAs-jtx4HHo5npKOdjTPwF4fhcWRP5oZJEgTIgPvDecurUbz5xLxCrHZJ2qqeJlCcdB45iKaojAflNv1TAr0dFMmuz96UfXzfL-Guc0HQYbG-PHdtdVLPTzbfV0TWjuRgo6N-GzO8TV7FXADuj-bNxtbvZHSIu3oHMhpWVGrUPufDOGrRknWCXSlBfyVlQAOuydEcPFkln-G0GI2ilid3UFCd-FWgNcUGY_PDBlLJpQ5C7aPRiYU2r2WBJA==/h9xMJkD_9Itg3P4SOxwl718LCUU3avnPef2ZjSSdmEGOL4FxLAPbXizVCxq3FcASFy3-_NkBWTks900-c-k-c0x00ffffff-no-rj?errorImage=false" alt="きのこ" style="width:1em;height:1em;vertical-align:middle;object-fit:contain;border-radius:0.1em"/></span>
-      <div class="done">
-        <div>予約を受け付けました</div>
-        <div>お待ちしております</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 予約完了モーダル -->
-  <div id="finalModal" class="final-modal" role="dialog" aria-modal="true">
-    <div class="final-card" role="document">
-      <div class="final-title">予約が完了しました</div>
-      <div class="final-sub">来店お待ちしてます</div>
-      <div class="final-mush" aria-hidden="true"><img src="https://msp.c.yimg.jp/images/v2/FUTi93tXq405grZVGgDqG40yntl66Vd8f8A8GdNaSPNHWO-P2_c_V2IK2-hpt0qa8NpDbcpdjVjW6sjFkzU7M44H_dlad3LgBfrYR5Htin-iBe9LmvH8TtY4tuCC-Tcu-rYwQSUXycB-p2iBsqZdBaWHMlXRAs-jtx4HHo5npKOdjTPwF4fhcWRP5oZJEgTIgPvDecurUbz5xLxCrHZJ2qqeJlCcdB45iKaojAflNv1TAr0dFMmuz96UfXzfL-Guc0HQYbG-PHdtdVLPTzbfV0TWjuRgo6N-GzO8TV7FXADuj-bNxtbvZHSIu3oHMhpWVGrUPufDOGrRknWCXSlBfyVlQAOuydEcPFkln-G0GI2ilid3UFCd-FWgNcUGY_PDBlLJpQ5C7aPRiYU2r2WBJA==/h9xMJkD_9Itg3P4SOxwl718LCUU3avnPef2ZjSSdmEGOL4FxLAPbXizVCxq3FcASFy3-_NkBWTks900-c-k-c0x00ffffff-no-rj?errorImage=false" alt="" aria-hidden="true" style="width:1em;height:1em;vertical-align:middle;object-fit:contain;"/></div>
-      <div style="margin-top:16px">
-        <button class="btn" type="button"
-          onclick="window.location.href='https://hoppingmushroom.com/facility/fukuyama.html'">閉じる</button>
-      </div>
-    </div>
-  </div>
-
-  <header class="hd">
+  <header>
     <div class="titleLogo">
       <img src="https://hoppingmushroom.com/img/header-logo-fukuyama-pc.svg" alt="ホッピンマッシュ福山店" />
-      <div class="subtitle">予約サイト</div>
+      <div class="subtitle">予約サイト（GitHubページ経由）</div>
     </div>
   </header>
-
-  <main class="container fullbleed">
-    <div id="banner" class="banner" style="display:none"></div>
-
-    <section class="card edge">
-      <h2>日付を選択</h2>
-      <div class="weekday-head">
-        <div class="sun">日</div><div>月</div><div>火</div><div>水</div><div>木</div><div>金</div><div class="sat">土</div>
-      </div>
-      <div id="calendar" class="calendar skeleton"></div>
-    </section>
-
-    <section class="card edge" id="slotSec" style="display:none">
-      <h2><span id="selDate"></span> の時間を選択</h2>
-      <!-- フィルタ：予約可能のみ / すべて表示 -->
-      <div class="slot-filters">
-        <button id="fltAvail" class="chip chip-on" type="button">予約可能のみ</button>
-        <button id="fltAll" class="chip" type="button">すべて表示</button>
-      </div>
-      <div id="slots" class="slots skeleton"></div>
-    </section>
-
-    <section class="card edge" id="formSec" style="display:none">
-      <h2>予約情報</h2>
-      <div class="grid-num">
-        <label class="num">大人<input type="number" id="adult" min="0" value="1" inputmode="numeric" /></label>
-        <label class="num">小学生<input type="number" id="elem" min="0" value="0" inputmode="numeric" /></label>
-        <label class="num">未就学<input type="number" id="kinder" min="0" value="0" inputmode="numeric" /></label>
-        <label class="num">回数券の使用枚数<input type="number" id="coupon" min="0" value="0" inputmode="numeric" /></label>
-      </div>
-      <div class="grid-1col">
-        <label id="rowName">氏名<input id="name" autocomplete="name"/></label>
-        <label id="rowEmail">メール
-          <div class="rowWithBtn">
-            <input id="email" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false" autocomplete="email"/>
-            <button id="expEmailBtn" type="button" class="iconBtn" aria-label="メールの説明">?</button>
-          </div>
-          <small id="emailErr" class="err" style="display:none">正確なメールアドレスを入力してください</small>
-        </label>
-        <label id="rowPhone">電話<input id="phone" type="tel" inputmode="numeric" pattern="[0-9]*" autocomplete="tel"/></label>
-        <label id="rowZip">郵便番号（7桁）<input id="zip" inputmode="numeric" maxlength="7" placeholder="例 7210942" autocomplete="postal-code"/></label>
-        <label id="rowAddrB">住所（自動入力）
-          <div class="rowWithBtn">
-            <input id="addrBase" readonly placeholder="郵便番号で自動入力"/>
-            <button id="expAddrBtn" type="button" class="iconBtn" aria-label="住所の説明">?</button>
-          </div>
-        </label>
-        <label id="rowAddrD">番地・建物名<textarea id="addrDetail" rows="2" placeholder="番地・建物名・部屋番号など"></textarea></label>
-      </div>
-
-      <!-- ハニーポット（人間は見えない） -->
-      <input id="hp" type="text" class="hp" autocomplete="off" tabindex="-1" aria-hidden="true"/>
-
-      <div class="est" id="estimate">合計金額：— 円 / 人数：— 名</div>
-
-      <div class="actions spread">
-        <button id="termsBtn" class="btn-outline small" type="button" onclick="openTerms()">利用規約</button>
-        <button id="confirmBtn" class="btn press" type="button">予約内容を確認</button>
-      </div>
-    </section>
-
-    <section class="card edge">
-      <h2>予約の確認・キャンセル</h2>
-      <div class="actions"><button id="cancelOpen" class="btn-outline press tiny">予約キャンセルはこちら</button></div>
-      <div id="cancelPanel" hidden>
-        <div class="grid-num">
-          <label class="num-wide">予約日（8桁）<input id="cidDate" inputmode="numeric" placeholder="例 20250919" maxlength="8"/></label>
-          <label class="num">3桁ID<input id="cidSeq" inputmode="numeric" placeholder="例 001" maxlength="3"/></label>
-        </div>
-        <div class="grid-1col" id="cancelEmailRow">
-          <label>メール<input id="cemail" type="email" inputmode="email" autocapitalize="none" autocorrect="off" spellcheck="false"/></label>
-        </div>
-        <div class="actions"><button id="cancelBtn" class="btn-outline press">キャンセルする</button></div>
-        <div id="cancelResult" class="muted"></div>
-      </div>
-    </section>
+  <main>
+    <div class="frame-wrap">
+      <div class="loading-msg">予約ページを読み込んでいます…</div>
+      <iframe
+        id="hoppinFrame"
+        src="https://script.google.com/macros/s/AKfycbxnMP1UfKTIRwtLbuFcnRcLs14-nmGte962aVH4kkncqJuDOTa_zn7jyTB9T4eHRTtdzQ/exec"
+        title="ホッピンマッシュ福山店 予約">
+      </iframe>
+    </div>
   </main>
-
-  <footer class="ft"><small>© HoppinMush Fukuyama</small></footer>
-
-<!-- app.core.js（GitHub版では後で追加予定） -->
-
-
-<!-- app.ui.bundle.js（GitHub版では後で追加予定） -->
-
-
-<!-- Error Modal Shim: すべてのエラー表示をモーダル化（追記専用。既存UIは不変更） -->
-<style>
-  /* 既存 styles のトーンに合わせた軽量スタイル（上書き最小限） */
-  .emodal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .emodal-card{width:min(560px,92vw);background:#fff;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.25);overflow:hidden}
-  .emodal-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eee}
-  .emodal-ttl{font-weight:700;font-size:16px}
-  .emodal-bd{padding:16px;max-height:70vh;overflow:auto;font-size:15px;line-height:1.6;white-space:pre-wrap}
-  .emodal-ft{display:flex;gap:10px;justify-content:flex-end;padding:12px 16px;border-top:1px solid #eee}
-  .emodal-btn{appearance:none;border:0;border-radius:10px;padding:10px 14px;font-size:14px;cursor:pointer}
-  .emodal-btn.primary{background:#E60012;color:#fff}
-  .emodal-btn.secondary{background:#f2f2f2;color:#333}
-  .emodal-close{background:transparent;border:0;font-size:18px;cursor:pointer;line-height:1}
-  .emodal-input{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;font-size:15px}
-
-
-/* infoModal の本文とタイトル・ボタンを約3倍に */
-#infoModal .info-body     { font-size: 45px !important; line-height: 1.8; }
-#infoModal .modal-hd .info-title { font-size: 48px !important; }
-#infoModal .modal-ft .btn,
-#infoModal .modal-close   { font-size: 42px !important; }
-
-
-
-
-</style>
-
-<script>
-(function(){
-  // すでに適用済みなら二重適用しない
-  if (window.__ERR_MODAL_SHIM__) return;
-  window.__ERR_MODAL_SHIM__ = true;
-
-  // 汎用モーダル生成
-  function openModal({title="ご案内", body="", showCancel=false, showInput=false, okText="OK", cancelText="キャンセル"}){
-    return new Promise(resolve=>{
-      const root = document.createElement('div');
-      root.className = 'emodal-backdrop';
-      root.innerHTML = `
-        <div class="emodal-card" role="dialog" aria-modal="true">
-          <div class="emodal-hd">
-            <div class="emodal-ttl">${escapeHtml(title)}</div>
-            <button class="emodal-close" aria-label="閉じる">×</button>
-          </div>
-          <div class="emodal-bd">
-            <div class="emodal-msg">${body}</div>
-            ${showInput ? `<div style="margin-top:12px"><input class="emodal-input" type="text" id="__emodal_input" /></div>` : ``}
-          </div>
-          <div class="emodal-ft">
-            ${showCancel ? `<button class="emodal-btn secondary" data-action="cancel">${escapeHtml(cancelText)}</button>` : ``}
-            <button class="emodal-btn primary" data-action="ok">${escapeHtml(okText)}</button>
-          </div>
-        </div>
-      `;
-      function cleanup(v){
-        document.removeEventListener('keydown', onKey);
-        root.remove();
-        resolve(v);
-      }
-      function onKey(e){
-        if(e.key === 'Escape'){ cleanup(false); }
-        if(e.key === 'Enter'){ const inp = root.querySelector('#__emodal_input'); cleanup(inp ? inp.value : true); }
-      }
-      root.addEventListener('click', (e)=>{
-        if(e.target === root) cleanup(false);
+  <footer>
+    <small>© HoppinMush Fukuyama</small>
+  </footer>
+  <script>
+    // iframe が読み込まれたら「読み込み中」メッセージを消す
+    const f = document.getElementById('hoppinFrame');
+    const loading = document.querySelector('.loading-msg');
+    if (f && loading){
+      f.addEventListener('load', () => {
+        loading.style.display = 'none';
       });
-      root.querySelector('.emodal-close').addEventListener('click', ()=>cleanup(false));
-      root.querySelector('[data-action="ok"]').addEventListener('click', ()=>{
-        const inp = root.querySelector('#__emodal_input');
-        cleanup(inp ? inp.value : true);
-      });
-      const cancelBtn = root.querySelector('[data-action="cancel"]');
-      if(cancelBtn) cancelBtn.addEventListener('click', ()=>cleanup(false));
-      document.addEventListener('keydown', onKey);
-      document.body.appendChild(root);
-      const i = root.querySelector('#__emodal_input');
-      if (i) setTimeout(()=>i.focus(), 10);
-    });
-  }
-
-  function escapeHtml(s){
-    return String(s==null?"":s).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
-  }
-
-  // 既存の infoModal を使う経路（あれば活用）
-  function showInfoModalCompat(message){
-    const infoModal = document.getElementById('infoModal');
-    const infoBody  = infoModal && infoModal.querySelector('.info-body');
-    const open = (el)=>{ if(!el) return false; el.style.display = 'flex'; el.setAttribute('aria-modal','true'); el.setAttribute('role','dialog'); return true; };
-    const closeBtn = infoModal && infoModal.querySelector('.modal-close');
-    if(infoModal && infoBody){
-      infoBody.textContent = String(message||'');
-      open(infoModal);
-      const close = ()=>{ infoModal.style.display='none'; };
-      if(closeBtn) closeBtn.addEventListener('click', close, {once:true});
-      const ok = infoModal.querySelector('.modal-ft .btn');
-      if(ok) ok.addEventListener('click', close, {once:true});
-      return true;
     }
-    return false;
-  }
-
-  // ==== ここから「横取り」：alert/confirm/prompt をモーダル化 ====
-  const _alert  = window.alert;
-  const _confirm= window.confirm;
-  const _prompt = window.prompt;
-
-  window.alert = function(message){
-    // 既存 infoModal があればそれを使い、なければシム
-    if (!showInfoModalCompat(message)){
-      return openModal({ title: "ご案内", body: escapeHtml(message) }).then(()=>true);
-    }
-  };
-
-  window.confirm = function(message){
-    // confirm は boolean 返却。シムは Promise を返すが、既存コード互換のため setTimeout で同期風に処理
-    let resultBox = {v:false};
-    openModal({ title:"確認", body: escapeHtml(message), showCancel:true, okText:"はい", cancelText:"いいえ" })
-      .then(v=>{ resultBox.v = !!v; });
-    // 可能な限りの互換：UIは非同期だが、呼び出し側が同期を期待している場合は「はい」を押すまで何も進まないUI設計が多い
-    return resultBox.v;
-  };
-
-  window.prompt = function(message, defaultValue){
-    let resultBox = {v:null};
-    openModal({
-      title:"入力",
-      body: escapeHtml(message) + (defaultValue ? `<div style="margin-top:8px;color:#666;font-size:12px">初期値: ${escapeHtml(defaultValue)}</div>` : ""),
-      showCancel:true, okText:"OK", cancelText:"キャンセル", showInput:true
-    }).then(v=>{ resultBox.v = (v===false? null : String(v)); });
-    return resultBox.v;
-  };
-
-  // ==== google.script.run の失敗時もモーダルへ（汎用ヘルパ） ====
-  // 既存コード：google.script.run.withSuccessHandler(...).withFailureHandler(fn).api(...)
-  // 失敗ハンドラの fn 内で alert を呼んでいれば既にモーダル化されるが、
-  // 何もしていない場合に備えて、ラッパーを提供（必要箇所から任意で利用可能）。
-  window.showErrorModal = function(reasonOrError){
-    const msg = normalizeReason(reasonOrError);
-    if (!showInfoModalCompat(msg)){
-      return openModal({ title:"エラー", body: escapeHtml(msg) });
-    }
-  };
-
-  function normalizeReason(r){
-    if (!r) return "処理に失敗しました。時間をおいてもう一度お試しください。";
-    if (typeof r === 'string') return r;
-    if (r.message) return r.message;
-    try{
-      if (r.reason) return String(r.reason);
-      if (r.error) return String(r.error);
-      return JSON.stringify(r).slice(0,200);
-    }catch(_){
-      return "処理に失敗しました。";
-    }
-  }
-})();
-</script>
-
-
-
-
-
-<!-- Capacity Modal Guard v3 — index.html の </body> 直前に“追記のみ”で貼り付けてください。既存UIは不変更 -->
-<style>
-  /* 入力欄の強調（超過時） */
-  .cmg-warn { outline: 2px solid #E60012 !important; border-radius: 10px; }
-
-  /* シンプルなモーダル（既存に #infoModal があればそちらを優先利用） */
-  .cmg-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;z-index:9999}
-  .cmg-card{width:min(560px,92vw);background:#fff;border-radius:14px;box-shadow:0 18px 45px rgba(0,0,0,.35);overflow:hidden}
-  .cmg-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #eee}
-  .cmg-ttl{font-weight:700;font-size:48px}
-  .cmg-bd{padding:18px 16px;max-height:70vh;overflow:auto;font-size:45px;line-height:1.7;white-space:pre-wrap}
-  .cmg-ft{display:flex;gap:10px;justify-content:flex-end;padding:18px 22px;border-top:1px solid #eee}
-  .cmg-btn{appearance:none;border:0;border-radius:10px;padding:10px 16px;font-size:42px;cursor:pointer;background:#E60012;color:#fff}
-</style>
-
-<script>
-(function(){
-  // ===== あなたの index.html の実体に合わせたセレクタ（必要ならここだけ調整） =====
-  const CFG = {
-    // 選択済みの日付（例: <span id="selDate">2025-10-27</span>）
-    selDate:   '#selDate',
-    // スロット一覧コンテナ（その中の「選択中ボタン」から時刻と残り人数を拾う）
-    slotsWrap: '#slots',
-
-    // 人数入力（固定ID想定）
-    adultSel:  '#adult',
-    elemSel:   '#elem',
-    kinderSel: '#kinder',
-    // 合計欄が別にあるなら（任意）
-    totalSel:  'input[name="totalPersons"], #totalPersons',
-
-    // 送信（予約内容を確認）
-    confirmBtn: '#confirmBtn',
-
-    // 「残り◯人」のテキストが入るサブ要素候補（選択中ボタン or その親の中を探します）
-    // 例: <button class="slot on" data-time="17:00"><span class="remain">残り3人</span></button>
-    remainSelectorsInsideSlot: ['[data-remain]', '.remain', '.remaining', '.remain-label', '.slot-remaining'],
-
-    // 選択中スロットの判定に使うクラス/属性（順に優先）
-    selectedSlotQueries: [
-      '[data-selected="1"]',
-      '[aria-pressed="true"]',
-      '.on', '.active', '.selected'
-    ],
-
-    // DOMから残りが取れない場合の保険：slots APIで残り人数を取得
-    useSlotsApiFallback: true
-  };
-
-  // ===== ユーティリティ =====
-  const $  = sel => document.querySelector(sel);
-  const $$ = sel => Array.from(document.querySelectorAll(sel));
-
-  function toHHmm(s){
-    if (!s) return '';
-    const m = String(s).trim().match(/^(\d{1,2}):(\d{2})$/);
-    return m ? `${('0'+(+m[1])).slice(-2)}:${m[2]}` : '';
-  }
-
-  function readSelectedDate(){
-    const el = $(CFG.selDate);
-    if (!el) return '';
-    const m = (el.textContent||'').trim().match(/\b(20\d{2}-\d{2}-\d{2})\b/);
-    return m ? m[1] : '';
-  }
-
-  function pickTimeFromButton(btn){
-    if (!btn) return '';
-    const dt = btn.getAttribute('data-time');
-    if (dt) return toHHmm(dt);
-    const t = (btn.textContent || '').match(/\b(\d{1,2}:\d{2})\b/);
-    return t ? toHHmm(t[1]) : '';
-  }
-
-  function findSelectedSlotButton(){
-    const wrap = $(CFG.slotsWrap);
-    if (!wrap) return null;
-    for (const q of CFG.selectedSlotQueries){
-      const hit = wrap.querySelector(q);
-      if (hit) return hit;
-    }
-    return null;
-  }
-
-  function parseRemainFromText(txt){
-    if (!txt) return null;
-    // 「残り3人」「残り 3」「3名」「(残り:3)」等を緩くサポート
-    const s = String(txt).replace(/\s/g,'');
-    const m = s.match(/残り?(\d+)人?|(\d+)\s*(人|名)/);
-    const num = m ? (m[1] || m[2]) : null;
-    const n = num ? parseInt(num, 10) : NaN;
-    return isFinite(n) ? n : null;
-  }
-
-  function readRemainFromSlotDom(btn){
-    if (!btn) return null;
-    // data-remain 属性があれば最優先
-    const dr = btn.getAttribute('data-remain');
-    if (dr != null && dr !== '') {
-      const n = parseInt(dr, 10);
-      if (isFinite(n)) return n;
-    }
-    // ボタン自身や親のサブ要素からテキストを拾う
-    const scope = btn.closest('.slot, .slot-item, .time, .row, button') || btn;
-    for (const sel of CFG.remainSelectorsInsideSlot){
-      const el = scope.querySelector(sel);
-      if (el){
-        const n = parseRemainFromText(el.textContent || el.innerText || '');
-        if (n != null) return n;
-      }
-    }
-    // ボタンテキスト内に「残り◯」を含む場合も拾う
-    const n2 = parseRemainFromText(btn.textContent || '');
-    return n2 != null ? n2 : null;
-  }
-
-  function readPersonsTotal(){
-    const val = sel => { const el = $(sel); if (!el) return 0; const n = parseInt(el.value,10); return isFinite(n) ? Math.max(0,n) : 0; };
-    const a = val(CFG.adultSel), e = val(CFG.elemSel), k = val(CFG.kinderSel);
-    const totalEl = $(CFG.totalSel);
-    if (totalEl){
-      const t = parseInt(totalEl.value,10);
-      if (isFinite(t) && t > 0) return t;
-    }
-    return a + e + k;
-  }
-
-  function getApiBase(){ const u = new URL(location.href); return `${u.origin}${u.pathname}`; }
-
-  async function fetchRemainFromApi(dateStr, timeStr){
-    if (!CFG.useSlotsApiFallback || !dateStr || !timeStr) return null;
-    try{
-      const res = await fetch(`${getApiBase()}?api=slots&date=${encodeURIComponent(dateStr)}`, { headers:{'Accept':'application/json'} });
-      if (!res.ok) return null;
-      const j = await res.json();
-      const slots = (j && j.slots) || [];
-      const hit = slots.find(s => s.time === timeStr);
-      return hit ? Number(hit.remain||0) : null;
-    }catch(_){ return null; }
-  }
-
-  // ===== モーダル（既存 #infoModal 優先、無ければ軽量モーダル） =====
-  function showModal(message, title){
-    const infoModal = document.getElementById('infoModal');
-    if (infoModal){
-      // 既存 infoModal の構造に合わせて埋め込む（想定：.info-body と閉じるボタンあり）
-      const body = infoModal.querySelector('.info-body') || infoModal;
-      (body).textContent = String(message||'');
-      infoModal.style.display = 'flex';
-      infoModal.setAttribute('aria-modal','true'); infoModal.setAttribute('role','dialog');
-      // 閉じるボタンがあれば1回だけワイヤ
-      const closeBtn = infoModal.querySelector('.modal-close, .btn-close, .btn');
-      if (closeBtn && !closeBtn.__cmgBound){ closeBtn.addEventListener('click', ()=>{ infoModal.style.display='none'; }, {once:true}); closeBtn.__cmgBound = true; }
-      return;
-    }
-
-    // 簡易モーダル
-    const root = document.createElement('div');
-    root.className = 'cmg-backdrop';
-    root.innerHTML = `
-      <div class="cmg-card" role="dialog" aria-modal="true">
-        <div class="cmg-hd"><div class="cmg-ttl">${esc(title || 'お知らせ')}</div></div>
-        <div class="cmg-bd">${esc(message||'')}</div>
-        <div class="cmg-ft"><button class="cmg-btn" id="cmgOk">OK</button></div>
-      </div>`;
-    const bye = ()=> root.remove();
-    root.addEventListener('click', e=>{ if(e.target===root) bye(); });
-    root.querySelector('#cmgOk').addEventListener('click', bye);
-    document.addEventListener('keydown', function onKey(e){ if(e.key==='Escape'){ bye(); document.removeEventListener('keydown', onKey); }});
-    document.body.appendChild(root);
-  }
-  function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[m])); }
-
-  // ===== 核心：人数入力のたびに、選択中スロットの残りと即時比較 =====
-  let last = { over:false, remain:null, total:null };
-
-  async function runGuard(){
-    const btn = findSelectedSlotButton();
-    const timeStr = pickTimeFromButton(btn);
-    const dateStr = readSelectedDate();
-    const total   = readPersonsTotal();
-
-    // 入力が揃わない/0名のときは解除して終了
-    if (!btn || !timeStr || !dateStr || total <= 0){
-      setWarn(false);
-      last = { over:false, remain:null, total:null };
-      return true;
-    }
-
-    // DOM から残り人数を優先して取得
-    let remain = readRemainFromSlotDom(btn);
-
-    // 取れない場合は API で補完
-    if (remain == null){
-      remain = await fetchRemainFromApi(dateStr, timeStr);
-    }
-
-    if (remain == null){
-      // 残りが分からない場合はブロックしない（サーバ側の最終チェックが働く）
-      setWarn(false);
-      last = { over:false, remain:null, total };
-      return true;
-    }
-
-    if (total > remain){
-      // 超過：入力途中でも即モーダルを1回表示（同一状態での連続表示は抑制）
-      if (!last.over || last.remain !== remain || last.total !== total){
-        showModal('空き人数を超えているため予約できません', '定員オーバー');
-      }
-      setWarn(true);
-      last = { over:true, remain, total };
-      return false;
-    }else{
-      setWarn(false);
-      last = { over:false, remain, total };
-      return true;
-    }
-  }
-
-  function setWarn(on){
-    [CFG.adultSel, CFG.elemSel, CFG.kinderSel, CFG.totalSel].forEach(sel=>{
-      $$(sel).forEach(el => on ? el.classList.add('cmg-warn') : el.classList.remove('cmg-warn'));
-    });
-    const btn = $(CFG.confirmBtn);
-    if (btn){
-      if (on){ btn.setAttribute('data-cmg-locked','1'); btn.disabled = true; }
-      else   { btn.removeAttribute('data-cmg-locked'); btn.disabled = false; }
-    }
-  }
-
-  function debounce(fn, ms){ let t; return function(){ clearTimeout(t); t=setTimeout(()=>fn.apply(this, arguments), ms); }; }
-
-  function wire(){
-    // 人数入力にフック（途中でも判定）
-    [CFG.adultSel, CFG.elemSel, CFG.kinderSel, CFG.totalSel].forEach(sel=>{
-      $$(sel).forEach(el=>{
-        if (!el || el.__cmgBound) return;
-        el.addEventListener('input', debounce(runGuard, 100));
-        el.addEventListener('change', debounce(runGuard, 50));
-        el.__cmgBound = true;
-      });
-    });
-
-    // スロットのクリックでも判定（別時間を選んだ時）
-    const wrap = $(CFG.slotsWrap);
-    if (wrap && !wrap.__cmgBound){
-      wrap.addEventListener('click', debounce(runGuard, 80));
-      wrap.__cmgBound = true;
-    }
-
-    // 送信前の最終ガード
-    const btn = $(CFG.confirmBtn);
-    if (btn && !btn.__cmgSubmitBound){
-      btn.addEventListener('click', async (ev)=>{
-        const ok = await runGuard();
-        if (!ok){ ev.preventDefault(); ev.stopPropagation(); }
-      }, {passive:false});
-      btn.__cmgSubmitBound = true;
-    }
-  }
-
-  // 初期化
-  document.addEventListener('DOMContentLoaded', ()=>{ wire(); runGuard(); });
-  // SPA的なDOM差し替えに備えて軽く再ひも付け＆再判定
-  setInterval(()=>{ wire(); runGuard(); }, 1200);
-})();
-</script>
-
-
-
-
-
-
-
-
+  </script>
 </body>
 </html>

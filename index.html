@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <!-- スマホでも倍率を少し下げて表示する -->
+  <!-- スマホでも倍率を下げて表示する（0.7倍） -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>ホッピンマッシュ福山店 予約</title>
   <style>
@@ -54,15 +54,14 @@
       color: #fff;
       z-index: 0;
     }
-    /* ★ スマホサイズでは少し縮小（0.9倍）して表示する */
+    /* ★ スマホサイズでは0.7倍に縮小して表示する */
     @media (max-width: 768px) {
       .frame-scale {
-        transform: scale(0.9); /* ここを 0.85 や 0.8 に変えるとさらに小さくできる */
+        transform: scale(0.7);
       }
       iframe {
-        /* 縮小しても余白が出ないように内側を少し大きめに確保 */
-        width: calc(100% / 0.9);
-        height: calc(100% / 0.9);
+        width: calc(100% / 0.7);
+        height: calc(100% / 0.7);
       }
     }
   </style>

@@ -2,17 +2,20 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <!-- スマホ全面最適化 -->
+  <!-- スマホでも倍率を少し下げて表示する -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>ホッピンマッシュ福山店 予約</title>
   <style>
-    /* 余計な装飾は一切入れず、iframeを画面いっぱいに表示するだけ */
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       width: 100%;
       background: #000;
+    }
+    body {
+      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
+        "Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
     }
     .frame-wrap {
       position: fixed;
@@ -21,6 +24,16 @@
       height: 100vh;
       overflow: hidden;
       background: #000;
+    }
+    .frame-scale {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      /* PCでは等倍 */
+      transform: scale(1);
+      transform-origin: top center;
     }
     iframe {
       border: none;
@@ -40,19 +53,30 @@
       font-size: 16px;
       color: #fff;
       z-index: 0;
-      font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
-        "Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+    }
+    /* ★ スマホサイズでは少し縮小（0.9倍）して表示する */
+    @media (max-width: 768px) {
+      .frame-scale {
+        transform: scale(0.9); /* ここを 0.85 や 0.8 に変えるとさらに小さくできる */
+      }
+      iframe {
+        /* 縮小しても余白が出ないように内側を少し大きめに確保 */
+        width: calc(100% / 0.9);
+        height: calc(100% / 0.9);
+      }
     }
   </style>
 </head>
 <body>
   <div class="frame-wrap">
     <div class="loading-msg" id="loadingMsg">予約ページを読み込んでいます…</div>
-    <iframe
-      id="hoppinFrame"
-      src="https://script.google.com/macros/s/AKfycbxnMP1UfKTIRwtLbuFcnRcLs14-nmGte962aVH4kkncqJuDOTa_zn7jyTB9T4eHRTtdzQ/exec"
-      title="ホッピンマッシュ福山店 予約">
-    </iframe>
+    <div class="frame-scale">
+      <iframe
+        id="hoppinFrame"
+        src="https://script.google.com/macros/s/AKfycbxnMP1UfKTIRwtLbuFcnRcLs14-nmGte962aVH4kkncqJuDOTa_zn7jyTB9T4eHRTtdzQ/exec"
+        title="ホッピンマッシュ福山店 予約">
+      </iframe>
+    </div>
   </div>
   <script>
     // iframe 読み込み完了で「読み込み中」を消す

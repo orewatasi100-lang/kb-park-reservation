@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <!-- ★ あえて viewport は指定しない：GAS 側の meta viewport をそのまま使う -->
   <title>ホッピンマッシュ福山店 予約</title>
   <style>
     html, body {
@@ -11,59 +11,30 @@
       height: 100%;
       width: 100%;
       background: #ffffff;
+    }
+    body {
       font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
         "Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
-      -webkit-text-size-adjust: 100%;
     }
     .frame-wrap {
-      position: fixed;
-      inset: 0;
       width: 100%;
       height: 100%;
-      overflow: hidden;
-      background: #ffffff;
     }
     iframe {
-      border: none;
-      margin: 0;
-      padding: 0;
       width: 100%;
       height: 100%;
+      border: none;
       display: block;
       background: #ffffff;
-    }
-    .loading-msg {
-      position: fixed;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      color: #555;
-      background: #ffffff;
-      z-index: 0;
     }
   </style>
 </head>
 <body>
   <div class="frame-wrap">
-    <div class="loading-msg" id="loadingMsg">予約ページを読み込んでいます…</div>
     <iframe
-      id="hoppinFrame"
       src="https://script.google.com/macros/s/AKfycbxnMP1UfKTIRwtLbuFcnRcLs14-nmGte962aVH4kkncqJuDOTa_zn7jyTB9T4eHRTtdzQ/exec"
       title="ホッピンマッシュ福山店 予約">
     </iframe>
   </div>
-  <script>
-    (function(){
-      var f = document.getElementById('hoppinFrame');
-      var loading = document.getElementById('loadingMsg');
-      if (f && loading){
-        f.addEventListener('load', function(){
-          loading.style.display = 'none';
-        });
-      }
-    })();
-  </script>
 </body>
 </html>

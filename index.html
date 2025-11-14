@@ -16,24 +16,19 @@
       -webkit-text-size-adjust: 100%;
     }
     .frame-wrap {
-      height: 100%;
+      position: fixed;
+      inset: 0;
       width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      background: #ffffff;
-      overflow: hidden;
-    }
-    .frame-inner {
-      /* GAS側の想定デザイン幅（中央帯） */
-      width: 420px;
       height: 100%;
-      transform-origin: top center;
+      overflow: hidden;
+      background: #ffffff;
     }
     iframe {
+      border: none;
+      margin: 0;
+      padding: 0;
       width: 100%;
       height: 100%;
-      border: none;
       display: block;
       background: #ffffff;
     }
@@ -45,44 +40,26 @@
       justify-content: center;
       font-size: 16px;
       color: #555;
+      background: #ffffff;
       z-index: 0;
-      background: rgba(255,255,255,0.6);
-      pointer-events: none;
     }
   </style>
 </head>
 <body>
-  <div class="loading-msg" id="loadingMsg">予約ページを読み込んでいます…</div>
   <div class="frame-wrap">
-    <div class="frame-inner" id="frameInner">
-      <iframe
-        id="hoppinFrame"
-        src="https://script.google.com/macros/s/AKfycbxnMP1UfKTIRwtLbuFcnRcLs14-nmGte962aVH4kkncqJuDOTa_zn7jyTB9T4eHRTtdzQ/exec"
-        title="ホッピンマッシュ福山店 予約">
-      </iframe>
-    </div>
+    <div class="loading-msg" id="loadingMsg">予約ページを読み込んでいます…</div>
+    <iframe
+      id="hoppinFrame"
+      src="https://script.google.com/macros/s/AKfycbxnMP1UfKTIRwtLbuFcnRcLs14-nmGte962aVH4kkncqJuDOTa_zn7jyTB9T4eHRTtdzQ/exec"
+      title="ホッピンマッシュ福山店 予約">
+    </iframe>
   </div>
   <script>
     (function(){
-      var inner = document.getElementById('frameInner');
-      var iframe = document.getElementById('hoppinFrame');
+      var f = document.getElementById('hoppinFrame');
       var loading = document.getElementById('loadingMsg');
-      var DESIGN_WIDTH = 420; // GAS側の中央帯の想定幅
-
-      function adjustScale(){
-        if (!inner) return;
-        var vw = window.innerWidth || document.documentElement.clientWidth || 420;
-        // 画面幅にピッタリ収まるようにスケールを計算（これ以上は拡大しない）
-        var s = vw / DESIGN_WIDTH;
-        if (s > 1) s = 1;
-        inner.style.transform = 'scale(' + s.toFixed(4) + ')';
-      }
-
-      window.addEventListener('resize', adjustScale);
-      adjustScale();
-
-      if (iframe && loading){
-        iframe.addEventListener('load', function(){
+      if (f && loading){
+        f.addEventListener('load', function(){
           loading.style.display = 'none';
         });
       }

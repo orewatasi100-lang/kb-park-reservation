@@ -2,7 +2,6 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <!-- スマホでも倍率を下げて表示する（0.7倍） -->
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>ホッピンマッシュ福山店 予約</title>
   <style>
@@ -11,38 +10,32 @@
       padding: 0;
       height: 100%;
       width: 100%;
-      background: #000;
-    }
-    body {
+      background: #ffffff;
       font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,
         "Hiragino Kaku Gothic ProN","Noto Sans JP",Meiryo,sans-serif;
+      -webkit-text-size-adjust: 100%;
     }
     .frame-wrap {
-      position: fixed;
-      inset: 0;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-      background: #000;
-    }
-    .frame-scale {
-      position: absolute;
-      inset: 0;
+      height: 100%;
+      width: 100%;
       display: flex;
       justify-content: center;
       align-items: flex-start;
-      /* PCでは等倍 */
-      transform: scale(1);
+      background: #ffffff;
+      overflow: hidden;
+    }
+    .frame-inner {
+      /* GAS側の想定デザイン幅（中央帯） */
+      width: 420px;
+      height: 100%;
       transform-origin: top center;
     }
     iframe {
-      border: none;
-      margin: 0;
-      padding: 0;
       width: 100%;
       height: 100%;
+      border: none;
       display: block;
-      background: #000;
+      background: #ffffff;
     }
     .loading-msg {
       position: fixed;
@@ -51,25 +44,17 @@
       align-items: center;
       justify-content: center;
       font-size: 16px;
-      color: #fff;
+      color: #555;
       z-index: 0;
-    }
-    /* ★ スマホサイズでは0.7倍に縮小して表示する */
-    @media (max-width: 768px) {
-      .frame-scale {
-        transform: scale(0.7);
-      }
-      iframe {
-        width: calc(100% / 0.7);
-        height: calc(100% / 0.7);
-      }
+      background: rgba(255,255,255,0.6);
+      pointer-events: none;
     }
   </style>
 </head>
 <body>
+  <div class="loading-msg" id="loadingMsg">予約ページを読み込んでいます…</div>
   <div class="frame-wrap">
-    <div class="loading-msg" id="loadingMsg">予約ページを読み込んでいます…</div>
-    <div class="frame-scale">
+    <div class="frame-inner" id="frameInner">
       <iframe
         id="hoppinFrame"
         src="https://script.google.com/macros/s/AKfycbxnMP1UfKTIRwtLbuFcnRcLs14-nmGte962aVH4kkncqJuDOTa_zn7jyTB9T4eHRTtdzQ/exec"
@@ -78,12 +63,26 @@
     </div>
   </div>
   <script>
-    // iframe 読み込み完了で「読み込み中」を消す
     (function(){
-      var f = document.getElementById('hoppinFrame');
+      var inner = document.getElementById('frameInner');
+      var iframe = document.getElementById('hoppinFrame');
       var loading = document.getElementById('loadingMsg');
-      if (f && loading) {
-        f.addEventListener('load', function(){
+      var DESIGN_WIDTH = 420; // GAS側の中央帯の想定幅
+
+      function adjustScale(){
+        if (!inner) return;
+        var vw = window.innerWidth || document.documentElement.clientWidth || 420;
+        // 画面幅にピッタリ収まるようにスケールを計算（これ以上は拡大しない）
+        var s = vw / DESIGN_WIDTH;
+        if (s > 1) s = 1;
+        inner.style.transform = 'scale(' + s.toFixed(4) + ')';
+      }
+
+      window.addEventListener('resize', adjustScale);
+      adjustScale();
+
+      if (iframe && loading){
+        iframe.addEventListener('load', function(){
           loading.style.display = 'none';
         });
       }
